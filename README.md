@@ -1,4 +1,4 @@
-# Globe
+# Index
 
 ### Problems I have met and Solution
 
@@ -26,7 +26,7 @@ option = {
 }
 ```
 
-- src目录下的.json文件无法正常打包
+- src目录下的.json文件无法正常打包，导致fetch取不到json数据
 `webpack.config.js`:
 ```js
 module: {
@@ -44,4 +44,28 @@ module: {
     },
   ]
 }
+```
+- fetch取到数据后，使用setState更新数据,地球无法显示bar3D的data，修改为`echartsInstance.setOption`
+```js
+ let echartsInstance = this.echartsReact.getEchartsInstance();
+ echartsInstance.setOption({
+    series: [{
+      type: 'bar3D',
+      coordinateSystem: 'globe',
+      shading: 'lambert',
+      bevelSize: 1,
+      minHeight: 0.2,
+      silent: true,
+      itemStyle: {
+        color: '#579242'
+      },
+      data: data,
+    }],
+ })
+        
+```
+```js
+<ReactEcharts
+   ref={e => this.echartsReact = e}
+   option={option}/>
 ```

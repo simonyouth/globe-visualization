@@ -2,17 +2,16 @@ import React from 'react';
 import ReactEcharts from 'echarts-for-react';
 import echarts from 'echarts/dist/echarts';
 import 'echarts-gl/dist/echarts-gl.js';
-import earth from './assets/earth.jpg';
-import population from './data/population.json';
+import earth from '../assets/earth.jpg';
+import high from '../assets/elev_bump_4k.jpg';
+import population from '../data/population.json';
+import { po } from '../data/po';
 import china from 'echarts/map/json/china.json';
 import world from 'echarts/map/json/world';
 echarts.registerMap('china', china);
 echarts.registerMap('world', world);
 
-class Globe extends React.Component {
-  state = {
-    data: [],
-  };
+class Index extends React.Component {
 
   handleGlobe = (params) => {
     console.log(params);
@@ -29,7 +28,21 @@ class Globe extends React.Component {
           return [dataItem[0], dataItem[1], Math.sqrt(dataItem[2])];
         });
 
-        this.setState({ data })
+        let echartsInstance = this.echartsReact.getEchartsInstance();
+        echartsInstance.setOption({
+          series: [{
+            type: 'bar3D',
+            coordinateSystem: 'globe',
+            shading: 'lambert',
+            bevelSize: 1,
+            minHeight: 0.2,
+            silent: true,
+            itemStyle: {
+              color: '#579242'
+            },
+            data: data,
+          }],
+        })
       })
       .catch(err => { console.log(err)})
   }
@@ -266,6 +279,7 @@ class Globe extends React.Component {
       backgroundColor: '#babebc',
       globe: {
         baseTexture: mapChart,
+        highTexture: high,
         displacementScale: 0.1,
         displacementQuality: 'ultra',
         shading: 'lambert',
@@ -280,51 +294,45 @@ class Globe extends React.Component {
         },
         light: {
           ambient: {
-            intensity: 0
+            intensity: 0.2
           },
           main: {
-            intensity: 2,
+            intensity: 0.5,
             shadow: true,
             shadowQuality: 'high'
           },
-          ambientCubemap: {
-            texture: 'asset/pisa.hdr',
-            exposure: 2,
-            diffuseIntensity: 1,
-            specularIntensity: 1
-          }
         },
         viewControl: {
           autoRotate: false
         },
-        series: [{
-          type: 'bar3D',
-          name: 'test',
-          coordinateSystem: 'globe',
-          shading: 'lambert',
-          minHeight: 0.2,
-          silent: true,
-          itemStyle: {
-            color: 'orange'
+        visualMap: {
+          max: 40,
+          calculable: true,
+          realtime: false,
+          inRange: {
+            color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
           },
-          data: this.state.data,
-        }],
+          outOfRange: {
+            colorAlpha: 0
+          }
+        },
+        series: []
       },
     };
 
     const events = {
       'click': this.handleGlobe,
     };
-    console.log(this.state.data)
 
     return (
       <ReactEcharts
-        notMerge={true}
+        ref={e => this.echartsReact = e}
         style={{height: '100%', width: '100%'}}
         onEvents={events}
+        lazyUpdate={true}
         option={option}/>
     )
   }
 }
 
-export default Globe;
+export default Index;
