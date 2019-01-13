@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import Globe from './globe';
+import Globe from './globe/index';
+import Grid3D from './grid/index';
 import './App.css';
 
 
