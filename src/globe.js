@@ -3,7 +3,7 @@ import ReactEcharts from 'echarts-for-react';
 import echarts from 'echarts/dist/echarts';
 import 'echarts-gl/dist/echarts-gl.js';
 import earth from './assets/earth.jpg';
-import './data/population.json';
+import population from './data/population.json';
 import china from 'echarts/map/json/china.json';
 import world from 'echarts/map/json/world';
 echarts.registerMap('china', china);
@@ -12,22 +12,17 @@ echarts.registerMap('world', world);
 class Globe extends React.Component {
   state = {
     data: [],
-  }
+  };
 
   handleGlobe = (params) => {
     console.log(params);
   };
 
   componentWillMount() {
-    fetch('./population.json', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    })
-      .then(res => res)
+    fetch(population)
+      .then(res => res.json())
       .then(res => {
-        console.log(res)
+
         const data = res.filter(function (dataItem) {
           return dataItem[2] > 0;
         }).map(function (dataItem) {
@@ -271,15 +266,32 @@ class Globe extends React.Component {
       backgroundColor: '#babebc',
       globe: {
         baseTexture: mapChart,
-        displacementScale: 1,
+        displacementScale: 0.1,
         displacementQuality: 'ultra',
         shading: 'lambert',
+        postEffect: {
+          enable: true,
+          SSAO: {
+            enable: true,
+            radius: 5,
+            intensity: 1.5,
+            quality: 'high'
+          }
+        },
         light: {
           ambient: {
-            intensity: 0.5
+            intensity: 0
           },
           main: {
-            intensity: 1.5
+            intensity: 2,
+            shadow: true,
+            shadowQuality: 'high'
+          },
+          ambientCubemap: {
+            texture: 'asset/pisa.hdr',
+            exposure: 2,
+            diffuseIntensity: 1,
+            specularIntensity: 1
           }
         },
         viewControl: {
@@ -289,6 +301,7 @@ class Globe extends React.Component {
           type: 'bar3D',
           name: 'test',
           coordinateSystem: 'globe',
+          shading: 'lambert',
           minHeight: 0.2,
           silent: true,
           itemStyle: {
@@ -302,9 +315,11 @@ class Globe extends React.Component {
     const events = {
       'click': this.handleGlobe,
     };
+    console.log(this.state.data)
 
     return (
       <ReactEcharts
+        notMerge={true}
         style={{height: '100%', width: '100%'}}
         onEvents={events}
         option={option}/>

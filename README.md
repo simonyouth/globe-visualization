@@ -25,3 +25,23 @@ option = {
   globe: { ...otherOptions },
 }
 ```
+
+- src目录下的.json文件无法正常打包
+`webpack.config.js`:
+```js
+module: {
+  rules: [
+    {
+      type: 'javascript/auto',
+      test: /\.(json)$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+         },
+      },
+    },
+  ]
+}
+```
