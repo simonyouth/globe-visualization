@@ -3,16 +3,42 @@ import ReactEcharts from 'echarts-for-react';
 import echarts from 'echarts/dist/echarts';
 import 'echarts-gl/dist/echarts-gl.js';
 import earth from './assets/earth.jpg';
+import './data/population.json';
 import china from 'echarts/map/json/china.json';
 import world from 'echarts/map/json/world';
 echarts.registerMap('china', china);
 echarts.registerMap('world', world);
 
 class Globe extends React.Component {
+  state = {
+    data: [],
+  }
 
   handleGlobe = (params) => {
     console.log(params);
   };
+
+  componentWillMount() {
+    fetch('./population.json', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+      .then(res => res)
+      .then(res => {
+        console.log(res)
+        const data = res.filter(function (dataItem) {
+          return dataItem[2] > 0;
+        }).map(function (dataItem) {
+          return [dataItem[0], dataItem[1], Math.sqrt(dataItem[2])];
+        });
+
+        this.setState({ data })
+      })
+      .catch(err => { console.log(err)})
+  }
+
 
   render() {
     const canvas = document.createElement('canvas');
@@ -240,6 +266,7 @@ class Globe extends React.Component {
       console.log(params)
     });
 
+
     const option = {
       backgroundColor: '#babebc',
       globe: {
@@ -258,8 +285,18 @@ class Globe extends React.Component {
         viewControl: {
           autoRotate: false
         },
-        series: [],
-      }
+        series: [{
+          type: 'bar3D',
+          name: 'test',
+          coordinateSystem: 'globe',
+          minHeight: 0.2,
+          silent: true,
+          itemStyle: {
+            color: 'orange'
+          },
+          data: this.state.data,
+        }],
+      },
     };
 
     const events = {
